@@ -1,4 +1,6 @@
 class Stats
+  attr_reader :data
+
   def initialize(data)
     @data = data
   end
@@ -8,34 +10,34 @@ class Stats
   end
 
   def median
-    @median ||= @data[count / 2]
+    @median ||= data[count / 2]
   end
 
   def mode
-    @mode ||= @data.group_by(&:itself).map { |_,v| v.count }.max
+    @mode ||= data.group_by(&:itself).map { |_,v| v.count }.max
   end
 
   def sum
-    @sum ||= @data.sum
+    @sum ||= data.sum
   end
 
   def count
-    @count ||= @data.count
+    @count ||= data.count
   end
 
   def min
-    @min ||= @data.min
+    @min ||= data.min
   end
 
   def max
-    @max ||= @data.max
+    @max ||= data.max
   end
 
   def std_dev
     @std_dev ||= Math.sqrt(sum_squared_diff / (count - 1).to_f)
   end
 
-  def all
+  def all_stats
     {
       sum: sum,
       count: count,
@@ -51,6 +53,6 @@ class Stats
   private
 
   def sum_squared_diff
-    @data.map { |v| (v - mean) ** 2 }.sum.to_f
+    data.map { |v| (v - mean) ** 2 }.sum.to_f
   end
 end
