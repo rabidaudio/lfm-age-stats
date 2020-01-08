@@ -1,0 +1,8 @@
+cache/
+tmp/
+log/
+.DS_Store
+node_modules/
+public/packs/
+public/components/
+*.sqlite3
