@@ -1,32 +1,23 @@
 class StatsController < ApplicationController
 
-  INDEX_USER_LIMIT = 5
+  def root
+    render component: 'Home', prerender: false, props: {
+      usernames: Scrobble.all_usernames
+    }
+  end
 
   def show
-    @scrobbles = Scrobble.username(params[:username])
+    @all_scrobbles = Scrobble.username(params[:username])
+    @scrobbles = @all_scrobbles.valid.with_release_info
 
-    render component: 'Stats', prerender: false, props: {
-      username: params[:username],
-      scrobble_count: @scrobbles.count,
-      scrobble_with_release_count: @scrobbles.with_release_info.count,
-      year_chart: @scrobbles.year_chart_data([params[:username]]),
-      age_stats: @scrobbles.age_stats.all_stats
-    }
+    render component: 'Show', prerender: false, props: Scrobble.all_stats(params[:username])
   end
 
   def index
-    @usernames = index_usernames
+    @usernames = params[:usernames] || Scrobble.all_usernames
 
-    render component: 'AgeChart', prerender: false, props: {
-      usernames: @usernames,
-      data: Scrobble.year_chart_data(@usernames),
-      width: 1000,
-      height: 600
+    render component: 'Index', prerender: false, props: {
+      data: @usernames.map { |u| Scrobble.all_stats(u) }
     }
-  end
-
-  def index_usernames
-    params.permit(usernames: [])[:usernames].try(:take, INDEX_USER_LIMIT) ||
-      Scrobble.distinct.limit(INDEX_USER_LIMIT).pluck(:username)
   end
 end

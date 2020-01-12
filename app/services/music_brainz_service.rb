@@ -1,30 +1,29 @@
-module MusicBrainzService
-  extend self
+class MusicBrainzService
+  include CacheMethods
 
-  # def initialize
-  #   @cache = Rails.cache # Cache.new(file_path: 'cache/musicbrainz')
-  # end
-
-  def album_info(mbid:, artist:, album:)
-    Rails.cache.fetch("album_info?mbid=#{mbid}&artist=#{artist}&album=#{album}") do
-      load_album_info(mbid: mbid, artist: artist, album: album)
+  def album_release_date(mbid:, artist:, album:)
+    results = search_release_groups(artist, album)
+    return if results.empty?
+    results.each do |result|
+      next if result[:score] < 90
+      group = find_release_group(results.first[:mbid])
+      next if group.first_release_date.future?
+      return group.first_release_date
     end
+    return nil
   end
 
   private
 
-  def load_album_info(mbid:, artist:, album:)
-    Rails.logger.info("REQUEST album_info?mbid=#{mbid}&artist=#{artist}&album=#{album}")
-    if mbid.present?
-      release = MusicBrainz::Release.find(mbid)
-      return release if release.present? && release.id.present?
-    end
+  cache :search_release_groups
+  def search_release_groups(artist, album)
+    Rails.logger.info("REQUEST ReleaseGroup?artist=#{artist}&album=#{album}")
+    MusicBrainz::ReleaseGroup.search(artist, album)
+  end
 
-    results = MusicBrainz::ReleaseGroup.search(artist, album)
-    return if results.empty? || results.first[:score] < 90
-    group = MusicBrainz::ReleaseGroup.find(results.first[:mbid])
-    releases = group.releases rescue nil
-    return unless releases
-    releases.first
+  cache :find_release_group
+  def find_release_group(mbid)
+    Rails.logger.info("REQUEST ReleaseGroup?mbid=#{mbid}")
+    MusicBrainz::ReleaseGroup.find(mbid)
   end
 end

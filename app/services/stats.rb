@@ -5,6 +5,14 @@ class Stats
     @data = data
   end
 
+  def histogram(bucket_size:)
+    bucket(bucket_size).map { |v, items| [v, items.count] }
+  end
+
+  def split_by(bucket_size:)
+    bucket(bucket_size).map { |bucket, items| [bucket, Stats.new(items)] }
+  end
+
   def mean
     @mean ||= sum.to_f / count.to_f
   end
@@ -14,7 +22,9 @@ class Stats
   end
 
   def mode
-    @mode ||= data.group_by(&:itself).map { |_,v| v.count }.max
+    return nil if count.zero?
+
+    @mode ||= data.group_by(&:itself).max_by { |k, v| v.count }.first
   end
 
   def sum
@@ -37,7 +47,15 @@ class Stats
     @std_dev ||= Math.sqrt(sum_squared_diff / (count - 1).to_f)
   end
 
-  def all_stats
+  def upper_bound
+    mean + std_dev
+  end
+
+  def lower_bound
+    mean - std_dev
+  end
+
+  def all
     {
       sum: sum,
       count: count,
@@ -46,11 +64,17 @@ class Stats
       mean: mean,
       median: median,
       mode: mode,
-      std_dev: std_dev
+      std_dev: std_dev,
+      upper_bound: upper_bound,
+      lower_bound: lower_bound
     }
   end
 
   private
+
+  def bucket(bucket_size)
+    data.group_by { |v| (v - min) / bucket_size }.sort_by(&:first)
+  end
 
   def sum_squared_diff
     data.map { |v| (v - mean) ** 2 }.sum.to_f
