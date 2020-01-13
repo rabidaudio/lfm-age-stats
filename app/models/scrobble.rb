@@ -1,27 +1,25 @@
 class Scrobble < ApplicationRecord
-  AGE_SQL = 'strftime(\'%s\', scrobbled_at) - strftime(\'%s\', release_date)'.freeze
+  AGE_SQL = (Rails.env.production? ?
+    'extract(epoch from scrobbled_at) - extract(epoch from release_date)'
+    : 'floor(strftime(\'%s\', scrobbled_at) - strftime(\'%s\', release_date))'
+  ).freeze
+
+  YEAR_SQL = (Rails.env.production? ?
+    'extract(year from release_date)::varchar'
+    : 'strftime(\'%Y\', release_date)'
+  ).freeze
 
   scope :valid, ->{
     where.not(scrobbled_at: nil).where('release_date <= scrobbled_at')
-      .where('scrobbled_at >= ?', Date.new(2010))
-      .where('scrobbled_at < ?', Date.new(2020))
+      .where(scrobbled_at: Date.new(2010)..Date.new(2020))
   }
   scope :username, ->(username) { where(username: username) }
   scope :artist, ->(artist) { where(artist: artist) }
   scope :album, ->(album) { where(album: album) }
   scope :with_release_info, ->{ where.not(release_date: nil) }
-  # scope :in_the_teens, ->{ where(scrobbled_at: Date.new(2010)..Date.new(2020)) }
-  scope :release_year, ->(year) { with_release_info.where(release_date: Date.new(year)..Date.new(year + 1)) }
-  scope :scrobble_year, ->(year) { where(scrobbled_at: Date.new(year)..Date.new(year + 1)) }
   scope :with_age, ->{ select("*, #{AGE_SQL} as age") }
-
   scope :early_fan, -> { valid.where("#{AGE_SQL} <= ?", 7.days) }
-
-  # scope :aggregate_by_relese_year, ->{ with_release_info.group('strftime(\'%Y\', release_date)').count }
-  scope :aggregate_by_user_and_relese_year, ->{ 
-    with_release_info.group('strftime(\'%Y\', release_date)', :username).count
-  }
-
+  scope :aggregate_by_user_and_relese_year, ->{  with_release_info.group(YEAR_SQL, :username).count }
   scope :aggregate_by_album, ->{ group(:artist, :album, :release_date).order(release_date: :desc).count }
 
   def self.all_usernames
