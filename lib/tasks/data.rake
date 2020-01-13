@@ -39,21 +39,4 @@ namespace :data do
       Scrobble.cache_stats!(username)
     end
   end
-
-  task :export_raw => [:environment] do
-    File.open('db/scrobbles.json', 'w') do |f|
-      Scrobble.find_each do |s|
-        f << s.to_json(except: [:id, :created_at, :updated_at])
-        f << "\n"
-      end
-    end
-  end
-
-  task :import_raw => [:environment] do
-    ActiveRecord::Base.transaction do
-      File.open('db/scrobbles.json').lines.each do |l|
-        Scrobble.create!(JSON.parse(l.chomp))
-      end
-    end
-  end
 end

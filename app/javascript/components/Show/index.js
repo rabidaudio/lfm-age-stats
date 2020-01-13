@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import { mapValues } from 'lodash'
 import { Duration } from 'luxon'
 
+import Loading from '../Loading'
 import YearChart from '../YearChart'
 import AgeHistogram from '../AgeHistogram'
 import AgeChange from '../AgeChange'
@@ -105,11 +106,36 @@ const Data = props => (
   </>
 )
 
-const Show = props => (
-  <div>
-    <h1><a href={`https://www.last.fm/user/${props.username}`}>{props.username}</a></h1>
-    {props.scrobble_count === 0 ? <NoneFound /> : <Data {...props} />}
-  </div>
-)
+class Show extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = { loaded: false }
+  }
+
+  componentDidMount () {
+    this.loadUserData()
+  }
+
+  async loadUserData () {
+    try {
+      const username = this.props.username || window.location.pathname.replace('/stats/', '')
+      const res = await window.fetch(`/api/stats/${username}.json`)
+      const data = await res.json()
+      this.setState({ username, data, loaded: true })
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  render () {
+    if (!this.state.loaded) return (<Loading />)
+    return (
+      <div>
+        <h1><a href={`https://www.last.fm/user/${this.state.username}`}>{this.state.username}</a></h1>
+        {this.state.data.scrobble_count === 0 ? <NoneFound /> : <Data {...this.state.data} />}
+      </div>
+    )
+  }
+}
 
 export default Show

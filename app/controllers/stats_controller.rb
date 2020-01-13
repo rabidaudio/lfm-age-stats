@@ -3,23 +3,14 @@
 # Statistics about music age
 class StatsController < ApplicationController
   def root
-    render component: 'Home', prerender: false, props: {
-      usernames: Scrobble.all_usernames
-    }
+    render component: 'Home', prerender: false
   end
 
-  def show
-    @all_scrobbles = Scrobble.username(params[:username])
-    @scrobbles = @all_scrobbles.valid.with_release_info
-
-    render component: 'Show', prerender: false, props: Scrobble.all_stats(params[:username])
-  end
+  # def show
+  #   render component: 'Show', prerender: false
+  # end
 
   def index
-    @usernames = params[:usernames] || Scrobble.all_usernames
-
-    render component: 'Index', prerender: false, props: {
-      data: @usernames.map { |u| Scrobble.all_stats(u) }
-    }
+    render component: 'Index', prerender: false
   end
 end

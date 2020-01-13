@@ -90,22 +90,6 @@ class Scrobble < ApplicationRecord
   end
 
   def self.all_stats(username)
-    JSON.parse(File.read(stats_path(username)))
-  end
-
-  def self.cache_stats!(username)
-    File.open(stats_path(username), 'w') do |f|
-      f << JSON.generate(Scrobble.generate_stats(username))
-    end
-  end
-
-  protected
-
-  def self.stats_path(username)
-    Rails.root.join("db/data/#{Base64.urlsafe_encode64(username)}")
-  end
-
-  def self.generate_stats(username)
     scrobbles = username(username).valid.with_release_info
     {
       username: username,
