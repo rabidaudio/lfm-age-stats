@@ -6,3 +6,4 @@ node_modules/
 public/packs/
 public/components/
 *.sqlite3
+db/*.json

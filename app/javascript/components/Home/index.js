@@ -44,6 +44,7 @@ class Home extends React.Component {
   render () {
     return (
       <React.Fragment>
+        <p>Select some users to compare.</p>
         <ul>
           { this.props.usernames.map(username =>
               <li key={this.keyFor(username)} name={username} className={styles.username}>
@@ -57,7 +58,7 @@ class Home extends React.Component {
             )
           }
         </ul>
-        <input className={styles.submit} type="button" onClick={this.submit} value="Compare" />
+        <input className={styles.submit} enabled={this.state.checked.size !== 0} type="button" onClick={this.submit} value="Compare" />
       </React.Fragment>
     )
   }
