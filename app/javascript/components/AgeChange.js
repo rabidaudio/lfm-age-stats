@@ -34,8 +34,8 @@ const AgeChange = props => {
       <Line dot={false} dataKey='upper_bound' stroke={DEFAULT_COLORS[1]} />
       <Line dot={false} dataKey='lower_bound' stroke={DEFAULT_COLORS[2]} />
       <Line dot={false} dataKey='min' stroke={DEFAULT_COLORS[3]} />
-      <Line dot={false} dataKey='max' stroke={DEFAULT_COLORS[4]} />
-      <Line dot={false} dataKey='median' stroke={DEFAULT_COLORS[5]} />
+      <Line dot={false} dataKey='max' stroke={DEFAULT_COLORS[5]} />
+      <Line dot={false} dataKey='median' stroke={DEFAULT_COLORS[6]} />
     </LineChart>
   )
 }

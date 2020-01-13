@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
 } from 'recharts'
-import { sample } from 'lodash'
 import colormap from 'colormap'
 
 const DEFAULT_COLORS = colormap()
@@ -20,7 +19,7 @@ const AgeHistogram = props => (
     <XAxis dataKey='months' />
     <YAxis />
     <Tooltip />
-    <Bar dataKey='count' fill={sample(DEFAULT_COLORS)} />
+    <Bar dataKey='count' fill={DEFAULT_COLORS[0]} />
   </BarChart>
 )
 
