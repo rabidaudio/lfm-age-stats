@@ -26,7 +26,12 @@ class Home extends React.Component {
   }
 
   submit () {
-    if (this.state.checked.length == 0) return
+    if (this.state.checked.size === 0) return
+    if (this.state.checked.size === 1) {
+      const username = this.state.checked.values().next().value
+      window.location = new URL(`/stats/${username}`, window.location.origin)
+      return
+    }
     const url = new URL('/stats', window.location.origin)
     this.state.checked.forEach(username => url.searchParams.append('usernames[]', username))
     window.location = url.toString()

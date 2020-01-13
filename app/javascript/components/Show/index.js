@@ -8,6 +8,7 @@ import YearChart from "../YearChart"
 import AgeHistogram from "../AgeHistogram"
 import AgeChange from "../AgeChange"
 import Metric from "../Metric"
+import AgeChangeHeatmap from "../AgeChangeHeatmap"
 
 import styles from "./styles"
 
@@ -102,6 +103,7 @@ const Show = props => (
           <AgeStatistics {...mapValues(props.age_stats, (value) => formatInterval(value))} />
           <AgeHistogram data={props.ages} />
           <AgeChange data={props.age_change} />
+          <AgeChangeHeatmap data={props.age_change_heatmap} />
           <EarlyFan data={props.early_fan_albums} />
         </React.Fragment>
     }

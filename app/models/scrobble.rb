@@ -33,7 +33,7 @@ class Scrobble < ApplicationRecord
   end
 
   def quarter
-    "#{scrobbled_at.year} Q#{((scrobbled_at.month - 1) / 3) + 1}"
+    (scrobbled_at.year * 4) + ((scrobbled_at.month - 1) / 3)
   end
 
   def self.year_stats
@@ -41,7 +41,7 @@ class Scrobble < ApplicationRecord
   end
 
   def self.age_stats
-    Stats.new(all.with_age.map(&:age).compact)
+    Stats.new(all.with_age.map(&:age).compact, mode_size: 1.week)
   end
 
   def self.early_fan_albums
@@ -63,6 +63,14 @@ class Scrobble < ApplicationRecord
     end
   end
 
+  def self.age_change_heatmap
+    all.with_age.group_by(&:quarter).sort_by(&:first).flat_map do |quarter, scrobbles|
+      Stats.new(scrobbles.map(&:age).compact).histogram(bucket_size: 90.days).map do |bucket, count|
+        { quarter: quarter, bucket: bucket, count: count }
+      end
+    end
+  end
+
   def self.year_chart_data
     query = aggregate_by_user_and_relese_year
     return [] if query.empty?
@@ -76,20 +84,24 @@ class Scrobble < ApplicationRecord
     end
   end
 
+  def self.reload_all_stats!
+    all_usernames.each { |u| Rails.cache.delete("all_stats?username=#{u}") }
+  end
+
   def self.all_stats(username)
     Rails.cache.fetch("all_stats?username=#{username}") do
-      all_scrobbles = Scrobble.username(username)
-      scrobbles = all_scrobbles.valid.with_release_info
+      scrobbles = username(username).valid.with_release_info
       {
         username: username,
-        scrobble_count: all_scrobbles.count,
+        scrobble_count: username(username).count,
         scrobble_with_release_count: scrobbles.count,
         year_chart: scrobbles.year_chart_data,
         year_stats: scrobbles.year_stats.all,
         age_stats: scrobbles.age_stats.all,
         ages: scrobbles.age_histogram,
         early_fan_albums: scrobbles.early_fan.early_fan_albums,
-        age_change: scrobbles.age_change
+        age_change: scrobbles.age_change,
+        age_change_heatmap: scrobbles.age_change_heatmap
       }
     end
   end

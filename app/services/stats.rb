@@ -1,16 +1,13 @@
 class Stats
   attr_reader :data
 
-  def initialize(data)
+  def initialize(data, mode_size: 1)
     @data = data
+    @mode_size = mode_size
   end
 
   def histogram(bucket_size:)
     bucket(bucket_size).map { |v, items| [v, items.count] }
-  end
-
-  def split_by(bucket_size:)
-    bucket(bucket_size).map { |bucket, items| [bucket, Stats.new(items)] }
   end
 
   def mean
@@ -18,13 +15,13 @@ class Stats
   end
 
   def median
-    @median ||= data[count / 2]
+    @median ||= data.sort[count / 2]
   end
 
   def mode
     return nil if count.zero?
 
-    @mode ||= data.group_by(&:itself).max_by { |k, v| v.count }.first
+    @mode ||= Stats.new(data.group_by { |d| d / @mode_size }.max_by { |k, v| v.count }.last).mean
   end
 
   def sum
