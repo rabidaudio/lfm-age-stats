@@ -89,25 +89,35 @@ class Scrobble < ApplicationRecord
     end
   end
 
-  def self.reload_all_stats!
-    all_usernames.each { |u| Rails.cache.delete("all_stats?username=#{u}") }
+  def self.all_stats(username)
+    JSON.parse(File.read(stats_path(username)))
   end
 
-  def self.all_stats(username)
-    Rails.cache.fetch("all_stats?username=#{username}") do
-      scrobbles = username(username).valid.with_release_info
-      {
-        username: username,
-        scrobble_count: username(username).count,
-        scrobble_with_release_count: scrobbles.count,
-        year_chart: scrobbles.year_chart_data,
-        year_stats: scrobbles.year_stats.all,
-        age_stats: scrobbles.age_stats.all,
-        ages: scrobbles.age_histogram,
-        early_fan_albums: scrobbles.early_fan.early_fan_albums,
-        age_change: scrobbles.age_change,
-        age_change_heatmap: scrobbles.age_change_heatmap
-      }
+  def self.cache_stats!(username)
+    File.open(stats_path(username), 'w') do |f|
+      f << JSON.generate(Scrobble.generate_stats(username))
     end
+  end
+
+  protected
+
+  def self.stats_path(username)
+    Rails.root.join("db/data/#{Base64.urlsafe_encode64(username)}")
+  end
+
+  def self.generate_stats(username)
+    scrobbles = username(username).valid.with_release_info
+    {
+      username: username,
+      scrobble_count: username(username).count,
+      scrobble_with_release_count: scrobbles.count,
+      year_chart: scrobbles.year_chart_data,
+      year_stats: scrobbles.year_stats.all,
+      age_stats: scrobbles.age_stats.all,
+      ages: scrobbles.age_histogram,
+      early_fan_albums: scrobbles.early_fan.early_fan_albums,
+      age_change: scrobbles.age_change,
+      age_change_heatmap: scrobbles.age_change_heatmap
+    }
   end
 end
