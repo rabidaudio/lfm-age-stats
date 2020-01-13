@@ -44,5 +44,8 @@ Layout/LineLength:
     - config/initializers/backtrace_silencers.rb
     - config/initializers/content_security_policy.rb
 
+Style/RegexpLiteral:
+  Enabled: false
+
 Metrics/AbcSize:
   Max: 25
