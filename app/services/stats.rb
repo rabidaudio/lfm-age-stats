@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+# Helper class for extracting statistics from an array
+# of numbers
 class Stats
   attr_reader :data
 
@@ -11,7 +15,7 @@ class Stats
   end
 
   def mean
-    @mean ||= sum.to_f / count.to_f
+    @mean ||= sum / count.to_f
   end
 
   def median
@@ -21,7 +25,7 @@ class Stats
   def mode
     return nil if count.zero?
 
-    @mode ||= Stats.new(data.group_by { |d| d / @mode_size }.max_by { |k, v| v.count }.last).mean
+    @mode ||= Stats.new(aggregated_mode_data).mean
   end
 
   def sum
@@ -54,8 +58,6 @@ class Stats
 
   def all
     {
-      sum: sum,
-      count: count,
       min: min,
       max: max,
       mean: mean,
@@ -69,11 +71,15 @@ class Stats
 
   private
 
+  def aggregated_mode_data
+    data.group_by { |d| d / @mode_size }.max_by { |_k, v| v.count }.last
+  end
+
   def bucket(bucket_size)
     data.group_by { |v| (v - min) / bucket_size }.sort_by(&:first)
   end
 
   def sum_squared_diff
-    data.map { |v| (v - mean) ** 2 }.sum.to_f
+    data.map { |v| (v - mean)**2 }.sum.to_f
   end
 end

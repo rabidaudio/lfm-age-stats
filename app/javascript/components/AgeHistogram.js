@@ -1,24 +1,26 @@
-import React from "react"
-import PropTypes from "prop-types"
+import React from 'react'
+import PropTypes from 'prop-types'
 
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend
-} from "recharts"
-import { sample } from "lodash"
-import colormap from "colormap"
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
+} from 'recharts'
+import { sample } from 'lodash'
+import colormap from 'colormap'
 
 const DEFAULT_COLORS = colormap()
 
 const AgeHistogram = props => (
-  <BarChart width={props.width || 500}
-              height={props.height || 300}
-              data={props.data}
-              margin={{top: 5, right: 30, left: 20, bottom: 5}}>
-    <CartesianGrid strokeDasharray="3 3" />
-    <XAxis dataKey="months" />
+  <BarChart
+    width={props.width || 500}
+    height={props.height || 300}
+    data={props.data}
+    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+  >
+    <CartesianGrid strokeDasharray='3 3' />
+    <XAxis dataKey='months' />
     <YAxis />
     <Tooltip />
-    <Bar dataKey="count" fill={sample(DEFAULT_COLORS)} />
+    <Bar dataKey='count' fill={sample(DEFAULT_COLORS)} />
   </BarChart>
 )
 

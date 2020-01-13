@@ -1,6 +1,10 @@
+# frozen_string_literal: true
+
+# Repository for getting info from Last.FM api
 module LastFmService
   extend self
 
+  # an API error from Last.FM
   class Error < StandardError
     attr_reader :res
     def initialize(res)
@@ -47,10 +51,10 @@ module LastFmService
   end
 
   def throttle
-    @last_request ||= Time.at(0)
-    age = Time.now - @last_request
+    @last_request ||= Time.zone.at(0)
+    age = Time.zone.now - @last_request
     sleep(throttle_time - age) if age < throttle_time
-    yield.tap { @last_request = Time.now }
+    yield.tap { @last_request = Time.zone.now }
   end
 
   def each_item(receiver, method, attr_path, args)
@@ -60,6 +64,7 @@ module LastFmService
       yield data
       total_pages = data.dig(*attr_path, 'totalPages').to_i
       break if page == total_pages
+
       page += 1
     end
   end

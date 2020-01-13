@@ -1,20 +1,26 @@
+# frozen_string_literal: true
+
+# A single Last.FM play, along with relase date information
 class Scrobble < ApplicationRecord
-  scope :valid, ->{
+  scope :valid, lambda {
     where.not(scrobbled_at: nil).where('release_date <= scrobbled_at')
-      .where(scrobbled_at: Date.new(2010)..Date.new(2020))
+         .where(scrobbled_at: Date.new(2010)..Date.new(2020))
   }
-  scope :with_release_info, ->{ where.not(release_date: nil) }
+  scope :with_release_info, -> { where.not(release_date: nil) }
   scope :username, ->(username) { where(username: username) }
   scope :artist, ->(artist) { where(artist: artist) }
   scope :album, ->(album) { where(album: album) }
-  scope :early_fan, -> {
-    where("floor(extract(epoch from scrobbled_at) - extract(epoch from release_date))::bigint <= ?", 7.days)
+  scope :early_fan, lambda {
+    where('floor(extract(epoch from scrobbled_at) - '\
+      'extract(epoch from release_date))::bigint <= ?', 7.days)
   }
 
-  scope :aggregate_by_user_and_relese_year, ->{
+  scope :aggregate_by_user_and_relese_year, lambda {
     group('extract(year from release_date)::varchar', :username).count
   }
-  scope :aggregate_by_album, ->{ group(:artist, :album, :release_date).order(release_date: :desc).count }
+  scope :aggregate_by_album, lambda {
+    group(:artist, :album, :release_date).order(release_date: :desc).count
+  }
 
   def self.all_usernames
     group(:username).order(:minimum_id).minimum(:id).keys
@@ -43,8 +49,8 @@ class Scrobble < ApplicationRecord
   end
 
   def self.early_fan_albums
-    all.early_fan.aggregate_by_album.map do |(artist, album, release_date), count|
-      { artist: artist, album: album, release_date: release_date, count: count }
+    all.early_fan.aggregate_by_album.map do |(artist, album, date), count|
+      { artist: artist, album: album, release_date: date, count: count }
     end
   end
 
@@ -63,7 +69,8 @@ class Scrobble < ApplicationRecord
 
   def self.age_change_heatmap
     all.group_by(&:quarter).sort_by(&:first).flat_map do |quarter, scrobbles|
-      Stats.new(scrobbles.map(&:age).compact).histogram(bucket_size: 90.days).map do |bucket, count|
+      scrobble_age = Stats.new(scrobbles.map(&:age).compact)
+      scrobble_age.histogram(bucket_size: 90.days).map do |bucket, count|
         { quarter: quarter, bucket: bucket, count: count }
       end
     end
@@ -72,11 +79,11 @@ class Scrobble < ApplicationRecord
   def self.year_chart_data
     query = aggregate_by_user_and_relese_year
     return [] if query.empty?
+
     years_with_data = query.keys.map(&:first)
-    all_years = (years_with_data.min..years_with_data.max).to_a
     usernames = query.keys.map(&:last).uniq
-    all_years.map do |y|
-      usernames.reduce({ year: y.to_i }) do |d, u|
+    (years_with_data.min..years_with_data.max).to_a.map do |y|
+      usernames.reduce(year: y.to_i) do |d, u|
         d.merge(u => query[[y, u]] || 0)
       end
     end

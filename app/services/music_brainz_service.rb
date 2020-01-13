@@ -1,16 +1,22 @@
+# frozen_string_literal: true
+
+# Repository for getting info from MusicBrainz.org
 class MusicBrainzService
   include CacheMethods
 
-  def album_release_date(mbid:, artist:, album:)
+  def album_release_date(mbid:, artist:, album:) # rubocop:disable Lint/UnusedMethodArgument
     results = search_release_groups(artist, album)
     return if results.empty?
+
     results.each do |result|
       next if result[:score] < 90
+
       group = find_release_group(results.first[:mbid])
       next if group.first_release_date.future?
+
       return group.first_release_date
     end
-    return nil
+    nil
   end
 
   private

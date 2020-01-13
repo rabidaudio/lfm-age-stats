@@ -1,15 +1,13 @@
-import React from "react"
-import PropTypes from "prop-types"
+import React from 'react'
 
-import Show from "../Show"
+import Show from '../Show'
 
-import styles from "./styles"
+import styles from './styles'
 
 const Index = props => (
   <div className={styles.container}>
-    { props.data.map(childProps =>
-        <div className={styles.show} key={childProps.username}><Show {...childProps} /></div>)
-    }
+    {props.data.map(childProps =>
+      <div className={styles.show} key={childProps.username}><Show {...childProps} /></div>)}
   </div>
 )
 

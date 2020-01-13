@@ -1,5 +1,7 @@
-class StatsController < ApplicationController
+# frozen_string_literal: true
 
+# Statistics about music age
+class StatsController < ApplicationController
   def root
     render component: 'Home', prerender: false, props: {
       usernames: Scrobble.all_usernames

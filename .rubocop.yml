@@ -1,0 +1,48 @@
+require: rubocop-rails
+
+AllCops:
+  TargetRubyVersion: 2.6
+  Exclude:
+    - bin/*
+    - Guardfile
+    - config.ru
+    - Rakefile
+    - db/schema.rb
+    - db/data_schema.rb
+    - vendor/**/*
+    - node_modules/**/*
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Style/HashSyntax:
+  Exclude:
+    - lib/tasks/**/*
+
+Style/ModuleFunction:
+  EnforcedStyle: extend_self
+
+Style/Documentation:
+  Exclude:
+    - db/migrate/**/*
+
+Metrics/MethodLength:
+  Max: 15
+  Exclude:
+    - db/migrate/**/*
+
+Metrics/BlockLength:
+  Exclude:
+    - lib/tasks/**/*
+
+Layout/LineLength:
+  Max: 100
+  Exclude:
+    - config/initializers/backtrace_silencers.rb
+    - config/initializers/content_security_policy.rb
+
+Metrics/AbcSize:
+  Max: 25
