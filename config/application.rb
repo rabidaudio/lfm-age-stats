@@ -33,8 +33,5 @@ module LfmStats
     config.generators.system_tests = nil
 
     config.cache_store = :file_store, Rails.root.join("cache/#{Rails.env}")
-
-    config.logger = Logger.new(STDOUT)
-    config.log_level = :debug
   end
 end
