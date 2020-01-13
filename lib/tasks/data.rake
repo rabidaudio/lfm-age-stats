@@ -25,4 +25,21 @@ namespace :data do
       Rails.logger.info("#{username}: #{track.name} | #{artist} | #{album} on #{listened}")
     end
   end
+
+  task :export => [:environment] do
+    File.open('db/scrobbles.json', 'w') do |f|
+      Scrobble.find_each do |s|
+        f << s.to_json(except: [:id, :created_at, :updated_at])
+        f << "\n"
+      end
+    end
+  end
+
+  task :import => [:environment] do
+    ActiveRecord::Base.transaction do
+      File.open('db/scrobbles.json').lines.each do |l|
+        Scrobble.create!(JSON.parse(l.chomp))
+      end
+    end
+  end
 end
