@@ -90,6 +90,9 @@ class Scrobble < ApplicationRecord
   end
 
   def self.all_stats(username)
+    cache_path = Rails.root.join("docs/api/stats/#{username}.json")
+    return JSON.parse(File.read(cache_path)) if File.exist?(cache_path)
+
     scrobbles = username(username).valid.with_release_info
     {
       username: username,
