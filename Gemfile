@@ -9,10 +9,11 @@ ruby '2.6.5'
 gem 'pg'
 gem 'rails', '~> 6.0.2', '>= 6.0.2.1'
 # Use Puma as the app server
-gem 'puma', '~> 4.1'
+gem 'puma', '>= 4.3.3'
 # Transpile app-like JavaScript. Read more: https://github.com/rails/webpacker
 gem 'react-rails'
 gem 'webpacker', '~> 4.0'
+gem 'nokogiri', '>= 1.10.8'
 
 # Use Active Model has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
